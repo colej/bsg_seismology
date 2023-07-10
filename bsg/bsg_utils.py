@@ -150,7 +150,7 @@ def plot_TESS_stars(starName, indir, tpf, fig, gs1, gs2, show=False, save=True):
     # ------------------------------------------
 
     # Create a list of nearby bright stars (tess magnitude less than 17) from the rest of the data for later.
-    bright = catalogData['Tmag'] < catalogData['Tmag'][0] + 5
+    bright = catalogData['Tmag'] < catalogData['Tmag'][0] + 4
 
     # ---------------------------------------------
     # Get the data for the SDSS sky viewer --------
