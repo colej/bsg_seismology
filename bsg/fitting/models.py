@@ -82,79 +82,68 @@ def skewed_gaussian_func(x, a, b, c, d, e):
     return a * np.exp(-0.5 * ((x - b) / c) ** 2) * (1 + erf((x - b) / (d * np.sqrt(2)))) + e
 
 
-def symmetric_gaussian_func(nu, amplitude, mean, std):
-    return amplitude * np.exp(-0.5 * ((nu - mean) / std) ** 2)
+def symmetric_gaussian_func(x, amplitude, mean, std):
+    return amplitude * np.exp(-0.5 * ((x - mean) / std) ** 2)
 
 
-def harvey_func(frequencies, a, b):
-    return (a/b) / (1 + (frequencies / b) ** 2) 
+def harvey_func(x, a, b):
+    return (a/b) / (1 + (x / b) ** 2) 
 
 
-def white_noise_func(frequencies, white_noise):
-    return np.ones_like(frequencies) * white_noise
+def white_noise_func(x, white_noise):
+    return np.ones_like(x) * white_noise
 
 
-def fit_func(nu, gaussian_amplitude, gaussian_mean, gaussian_std, 
+def fit_func(x, gaussian_amplitude, gaussian_mean, gaussian_std, 
                  harvey_amplitude, harvey_timescale, 
                  white_noise):
 
-    return symmetric_gaussian_func(nu, gaussian_amplitude, gaussian_mean, gaussian_std) + \
-                                        harvey_func(nu, harvey_amplitude, harvey_timescale) + \
-                                        white_noise_func(nu, white_noise)
-
-    return fitted_parameters
+    return symmetric_gaussian_func(x, gaussian_amplitude, gaussian_mean, gaussian_std) + \
+                                        harvey_func(x, harvey_amplitude, harvey_timescale) + \
+                                        white_noise_func(x, white_noise)
 
 
-def run_fit(nu, amp):
+def run_fit(x,y):
 
     # Initial guess for the parameters
     # initial_guess = [gaussian_amplitude, gaussian_mean, gaussian_std, harvey_amplitude, harvey_timescale, white_noise]
-    initial_guess = [np.max(amp), nu[np.argmax(amp)], 0.1, 0.01*np.max(amp), 0.2, 0.001*np.max(amp)]
+    initial_guess = [np.max(y), x[np.argmax(y)], 0.1, 0.01*np.max(y), 0.2, 0.001*np.max(y)]
 
 
     # Perform the curve fitting
-    fitted_parameters, _ = curve_fit(fit_func, nu, amp, p0=initial_guess)
+    fit_parameters, _ = curve_fit(fit_func, x, y, p0=initial_guess)
 
-    return fitted_parameters
+    return fit_parameters
 
 
 
-def fit_excess(tic, times, fluxes, max_frequency=25):
+def fit_excess(tic, times, fluxes, max_frequency=25, normalization='amplitude'):
 
     # Compute Lomb-Scargle periodogram
     # Don't forget to remove the median of the flux array
-    nu, amp = LS_periodogram(times, fluxes-np.median(flux), max=max_frequency)
+    nu, amp = LS_periodogram(times, fluxes-np.median(fluxes), max=max_frequency)
+    amp*=1e6
 
+    if normalization == 'amplitude':
+        x = nu
+        y = amp
+        conversion = 1.
+
+    elif normalization == 'psd':
+
+        conversion = 1.e6 / 86400.
+        x = nu*conversion
+        y = (amp**2) / x
 
     # Smooth the amplitude array
-    window_size = len(nu[nu < 0.2])
-    amp_smoothed = smooth(amp, window_size, 'gaussian')
+    window_size = len(x[x < (0.2 * conversion)])
+    y_smoothed = smooth(y, window_size, 'gaussian')
 
 
     # Fit a skewed Gaussian on top of a Harvey profile with white noise offset
     # Your code for fitting the skewed Gaussian goes here
-    fitted_parameters = run_fit(nu, amp_smoothed)
-
-    fig, ax = plt.subplots(1,1,figsize=(9, 6))
-    ax.loglog(nu, amp*1e6, label='Original')
-    ax.loglog(nu, amp_smoothed*1e6, label='Smoothed')
-    ax.loglog(nu, fit_func(nu, *fitted_parameters)*1e6, 'k-', label='Fitted')
-    ax.loglog(nu, symmetric_gaussian_func(nu, *fitted_parameters[:3])*1e6, ':', label='Gaussian')
-    ax.loglog(nu, harvey_func(nu, *fitted_parameters[3:5])*1e6, ':', label='Harvey')    
-    ax.loglog(nu, white_noise_func(nu, fitted_parameters[5])*1e6, ':', label='White noise')
-    ax.set_ylim(1e-1, 1e4)
-    ax.set_xlim(1e-3, 25)
-    ax.set_xlabel(r'${\rm Frequency~[d^{-1}]}$')
-    ax.set_ylabel(r'${\rm Amplitude~[ppm]}$')
-    ax.legend()
-    fig.suptitle(r'${\rm TIC~}$'+f'{tic}')
-    fig.tight_layout()
-    fig.savefig('./lmc_pngs/TIC{}_fit.png'.format(tic))
-    # fig.savefig('./gal_pngs/TIC{}_fit.png'.format(tic))
-    fig.clf()
-    plt.close()
-    # plt.show()
+    fit_parameters = run_fit(x, y_smoothed)
 
 
     # Return the fitted parameters
-    return fitted_parameters
+    return x, y, y_smoothed, fit_parameters
