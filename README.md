@@ -50,6 +50,7 @@ conda activate bsg
 
 depending on how you've set up (ana/mini)conda.
 
+### Non-conda installs
 Furthermore, we need to use the latest development version of astroplan. This can be accomplished by downloading it directly from 
 github by issuing:
 
@@ -59,3 +60,8 @@ python setup.py build
 python setup.py install
 
 This will install the package in the relevant location so long as you do this while the bsg environment is activated.
+
+Finally, we will need the pythia package:
+  git clone https://github.com/colej/pythia
+
+The package has its own install instructions that can be found on the page.
