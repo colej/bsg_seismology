@@ -1,10 +1,10 @@
 # bsg_seismology
 This is a collection of codes / routines that will be used to detect and characterise asteroseismic signatures in pulsating blue super giant stars observed with TESS.  
 
-Code author:
+### Code author:
   - Cole Johnston
 
-Project 1
+### Project 1
 
   - Lead:
     - Linhao Ma
@@ -17,7 +17,7 @@ Project 1
   - Published as: 
     - https://ui.adsabs.harvard.edu/abs/2023arXiv231019546M/abstract
 
-Project 2: 
+### Project 2: 
   - Lead: 
     - Cole Johnston
   - Collaborators:
