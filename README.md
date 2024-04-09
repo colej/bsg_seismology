@@ -1,15 +1,35 @@
 # bsg_seismology
 This is a collection of codes / routines that will be used to detect and characterise asteroseismic signatures in pulsating blue super giant stars observed with TESS.  
-Lead:
-  - Linhao Ma
 
-Supervisors:
-   - Cole Johnston
-   - Earl Bellinger
-   - Selma de Mink
-   - Jim Fuller
+Code author:
+  - Cole Johnston
 
-At the moment, the first example uses functions stripped from LATTE (by N. Eisner) that are modified to work for our specific use case. 
+Project 1
+
+  - Lead:
+    - Linhao Ma
+
+  - Supervisors:
+    - Cole Johnston
+    - Earl Bellinger
+    - Selma de Mink
+    - Jim Fuller
+  - Published as: 
+    - https://ui.adsabs.harvard.edu/abs/2023arXiv231019546M/abstract
+
+Project 2: 
+  - Lead: 
+    - Cole Johnston
+  - Collaborators:
+    - Selma de Mink
+    - Earl Bellinger
+
+## Notebooks
+
+I'll keep a few example notebooks for how to use the various functions in the repo.
+
+  - example_01: At the moment, the first example uses functions stripped from LATTE (by N. Eisner) that are modified to work for our specific use case. 
+  - example_02: Notebook that fits the power excess for a given BSG using a simple Harvey profile + white noise + gaussian excess component
 
 
 ## Installation
