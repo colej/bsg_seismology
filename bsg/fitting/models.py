@@ -9,20 +9,6 @@ from scipy.optimize import curve_fit
 
 
 
-def skewed_gaussian_func(x, a, b, c, d, e):
-    return a * np.exp(-0.5 * ((x - b) / c) ** 2) * (1 + erf((x - b) / (d * np.sqrt(2)))) + e
-
-
-def symmetric_gaussian_func(x, amplitude, mean, std):
-    return amplitude * np.exp(-0.5 * ((x - mean) / std) ** 2)
-
-
-def harvey_func(x, a, b):
-    return (2.*np.pi*a/b) / (1 + (x / b) ** 2)
-
-
-def white_noise_func(x, white_noise):
-    return np.ones_like(x) * white_noise
 
 
 def fit_func(x, gaussian_amplitude, gaussian_mean, gaussian_std, 
