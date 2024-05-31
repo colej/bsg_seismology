@@ -5,22 +5,20 @@ import matplotlib.pyplot as plt
 from glob import glob
 from pythia.timeseries.lombscargle import LS_periodogram
 from scipy.optimize import curve_fit
-
-
-
-
-
+from .samplers import run_model
+from bsg.utils.processing import smooth
+from bsg.fitting.terms import skewed_gaussian_func, symmetric_gaussian_func, harvey_func, white_noise_func
 
 def fit_func(x, gaussian_amplitude, gaussian_mean, gaussian_std, 
-                 harvey_amplitude, harvey_timescale,
-                 white_noise):
+                harvey_amplitude, harvey_timescale,
+                white_noise):
 
     return symmetric_gaussian_func(x, gaussian_amplitude, gaussian_mean, gaussian_std) + \
-                                        harvey_func(x, harvey_amplitude, harvey_timescale) + \
-                                        white_noise_func(x, white_noise)
+           harvey_func(x, harvey_amplitude, harvey_timescale) + \
+           white_noise_func(x, white_noise)
 
 
-def run_fit(x,y,conversion):
+def run_optimizer(x,y,conversion):
 
     # Initial guess for the parameters
     # initial_guess = [gaussian_amplitude, gaussian_mean, gaussian_std, harvey_amplitude, harvey_timescale, white_noise]
@@ -29,12 +27,21 @@ def run_fit(x,y,conversion):
     # Perform the curve fitting
     fit_parameters, _ = curve_fit(fit_func, x, y, p0=initial_guess)
 
-    print(fit_parameters[-1])
-    return fit_parameters
+    fit_dict = {'gaussian_amplitude': fit_parameters[0], 'gaussian_mean': fit_parameters[1], 'gaussian_std': fit_parameters[2],
+                'harvey_amplitude': fit_parameters[3], 'harvey_timescale': fit_parameters[4],
+                'white_noise': fit_parameters[5]}
+    return fit_dict
 
 
+def run_sampler(x,y, colored_noise='Harvey'):
 
-def fit_excess(tic, times, fluxes, max_frequency=25, normalization='amplitude'):
+    trace = run_model(x, y, colored_noise=colored_noise)
+        
+    return trace
+
+def fit_model( tic, times, fluxes, max_frequency=25, normalization='amplitude', 
+               optimizer=True, optimizer_kwargs=None,
+               sampler=False, sampler_kwargs=None ):
 
     # Compute Lomb-Scargle periodogram
     # Don't forget to remove the median of the flux array
@@ -55,13 +62,27 @@ def fit_excess(tic, times, fluxes, max_frequency=25, normalization='amplitude'):
 
     # Smooth the amplitude array
     window_size = len(x[x < (0.2 * conversion)])
-    y_smoothed = smooth(y, window_size, 'gaussian')
+    y_smoothed = np.array(smooth(y, window_size, 'gaussian'))
+    print(np.shape(x),np.shape(y_smoothed))
 
+    # plt.loglog(x, y, 'k-')
+    # plt.loglog(x, y_smoothed, '-', color='darkorange')
+    # plt.show()
 
-    # Fit a skewed Gaussian on top of a Harvey profile with white noise offset
-    # Your code for fitting the skewed Gaussian goes here
-    fit_parameters = run_fit(x, y_smoothed, conversion)
+    if sampler:
+        # Fit a skewed Gaussian on top of a Harvey profile with white noise offset
+        # Your code for fitting the skewed Gaussian goes here
+        output = run_sampler(x, y_smoothed)
+        # output = pm.summary(trace)
+
+    elif optimizer:
+        # Fit a skewed Gaussian on top of a Harvey profile with white noise offset
+        # Your code for fitting the skewed Gaussian goes here
+        fit_parameters = run_optimizer(x, y_smoothed, conversion)
+        output = fit_parameters
+    else:
+        print('No optimizer or sampler selected. \n Please choose one of the two.')
 
 
     # Return the fitted parameters
-    return x, y, y_smoothed, fit_parameters
+    return x, y, y_smoothed, output
