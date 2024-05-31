@@ -1,3 +1,5 @@
+import numpy as np
+
 def gaussian04(N):
     n = np.arange(0,N)
     return np.exp(-0.5*((n-(N-1)/2)/(0.4*(N+1)/2))**2.)
