@@ -492,13 +492,14 @@ def plot_periodogram_fit(x, y, y_smoothed, fit_parameters,
                          xlabel=r'${\rm Frequency~[d^{-1}]}$',
                          ylabel=r'${\rm Amplitude~[ppm]}$'):
 
+    arr = np.array([fit_parameters[par] for par in fit_parameters])
     fig, ax = plt.subplots(1,1,figsize=(9, 6))
     ax.loglog(x, y, label='Original')
     ax.loglog(x, y_smoothed, label='Smoothed')
-    ax.loglog(x, models.fit_func(x, *fit_parameters), 'k-', label='Fitted')
-    ax.loglog(x, models.symmetric_gaussian_func(x, *fit_parameters[:3]), ':', label='Gaussian')
-    ax.loglog(x, models.harvey_func(x, *fit_parameters[3:5]), ':', label='Harvey')    
-    ax.loglog(x, models.white_noise_func(x, fit_parameters[-1]), ':', label='White noise')
+    ax.loglog(x, models.fit_func(x, *arr), 'k-', label='Fitted')
+    ax.loglog(x, models.symmetric_gaussian_func(x, *arr[:3]), ':', label='Gaussian')
+    ax.loglog(x, models.harvey_func(x, *arr[3:5]), ':', label='Harvey')    
+    ax.loglog(x, models.white_noise_func(x, arr[-1]), ':', label='White noise')
     ax.set_ylim(1e-1, max(y)*1.2)
     ax.set_xlim(min(x), max(x)+5.)
     ax.set_xlabel(xlabel)
