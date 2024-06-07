@@ -14,3 +14,7 @@ def harvey_func(x, a, b):
 
 def white_noise_func(x, white_noise):
     return np.ones_like(x) * white_noise
+
+
+def ma_func(x, a, b, gamma):
+    return (a * x/b) / (1 + (x / b) ** gamma)
